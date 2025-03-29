@@ -2,15 +2,15 @@ import { useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import AppRoutes from './routes';
-import Header from './components/layout/Header';
-import Footer from './components/layout/Footer';
 import { getCurrentUser } from './services/authService';
 import { loginSuccess, loginFailure } from './store/slices/authSlice';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const dispatch = useDispatch();
   
-  // Check for logged in user on app load
+  // Kiểm tra người dùng đã đăng nhập khi app khởi động
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -34,13 +34,8 @@ function App() {
   
   return (
     <Router>
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-grow">
-          <AppRoutes />
-        </main>
-        <Footer />
-      </div>
+      <AppRoutes />
+      <ToastContainer position="top-right" autoClose={5000} />
     </Router>
   );
 }

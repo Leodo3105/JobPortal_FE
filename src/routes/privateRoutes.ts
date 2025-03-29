@@ -1,17 +1,97 @@
 import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
-import React from 'react'; // Thêm dòng này
+import React from 'react';
+import PrivateRoute from '../components/auth/PrivateRoute';
 
 // Lazy load components
 const Dashboard = lazy(() => import('../pages/Dashboard'));
+const JobseekerDashboard = lazy(() => import('../pages/Jobseeker/Dashboard'));
+const EmployerDashboard = lazy(() => import('../pages/Employer/Dashboard'));
+const AdminDashboard = lazy(() => import('../pages/Admin/Dashboard'));
+const JobseekerProfile = lazy(() => import('../pages/Jobseeker/Profile'));
+const CompanyProfile = lazy(() => import('../pages/Employer/CompanyProfile'));
+const Unauthorized = lazy(() => import('../pages/Unauthorized'));
+const RoleBasedProfileRedirect = lazy(() => import('../components/auth/RoleBasedProfileRedirect'));
 
-// Protected routes (require authentication)
+// Layouts
+const DashboardLayout = lazy(() => import('../components/layout/DashboardLayout'));
+
+// Private routes (yêu cầu xác thực)
 const privateRoutes: RouteObject[] = [
   {
-    path: '/dashboard',
-    element: React.createElement(Dashboard)
+    element: React.createElement(PrivateRoute, null),
+    children: [
+      {
+        path: '/dashboard',
+        element: React.createElement(Dashboard, null)
+      },
+      // Chuyển hướng /profile dựa trên vai trò
+      {
+        path: '/profile',
+        element: React.createElement(RoleBasedProfileRedirect, null)
+      },
+      // Routes cho người tìm việc
+      {
+        element: React.createElement(PrivateRoute, { allowedRoles: ['jobseeker'] }),
+        children: [
+          {
+            path: '/jobseeker/profile',
+            element: React.createElement(JobseekerProfile, null)
+          },
+          {
+            element: React.createElement(DashboardLayout, null),
+            children: [
+              {
+                path: '/jobseeker/dashboard',
+                element: React.createElement(JobseekerDashboard, null)
+              }
+              // Thêm các route khác cho jobseeker
+            ]
+          }
+        ]
+      },
+      // Routes cho nhà tuyển dụng
+      {
+        element: React.createElement(PrivateRoute, { allowedRoles: ['employer'] }),
+        children: [
+          {
+            path: '/employer/company-profile',
+            element: React.createElement(CompanyProfile, null)
+          },
+          {
+            element: React.createElement(DashboardLayout, null),
+            children: [
+              {
+                path: '/employer/dashboard',
+                element: React.createElement(EmployerDashboard, null)
+              }
+              // Thêm các route khác cho employer
+            ]
+          }
+        ]
+      },
+      // Admin routes với dashboard layout
+      {
+        element: React.createElement(PrivateRoute, { allowedRoles: ['admin'] }),
+        children: [
+          {
+            element: React.createElement(DashboardLayout, null),
+            children: [
+              {
+                path: '/admin/dashboard',
+                element: React.createElement(AdminDashboard, null)
+              }
+              // Thêm các route khác cho admin
+            ]
+          }
+        ]
+      }
+    ]
   },
-  // Thêm các routes khác cần xác thực
+  {
+    path: '/unauthorized',
+    element: React.createElement(Unauthorized, null)
+  }
 ];
 
 export default privateRoutes;

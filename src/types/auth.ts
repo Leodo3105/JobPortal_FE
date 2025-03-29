@@ -9,11 +9,17 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
-  role: 'jobseeker' | 'employer';
+  role: 'jobseeker' | 'employer' | 'admin';
 }
 
 export interface AuthResponse {
   success: boolean;
   token: string;
   user: User;
+  message?: string;
+}
+
+export interface ResetPasswordData {
+  token: string;
+  password: string;
 }
