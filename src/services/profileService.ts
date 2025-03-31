@@ -48,13 +48,18 @@ export const uploadCV = async (formData: FormData): Promise<{ fileName: string; 
   return response.data.data;
 };
 
-// Upload ảnh đại diện - KIỂM TRA KỸ PHẦN NÀY
+// Xóa CV
+export const deleteCV = async (): Promise<{ success: boolean; message: string }> => {
+  const response = await api.delete<{ success: boolean; message: string }>('/cv');
+  return response.data;
+};
+
+// Upload ảnh đại diện
 export const uploadAvatar = async (formData: FormData): Promise<{ avatar: string; avatarUrl: string }> => {
   const response = await api.put<{ success: boolean; data: { avatar: string; avatarUrl: string } }>('/profiles/avatar', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   });
-  console.log('API response:', response.data); // Log để debug
   return response.data.data;
 };

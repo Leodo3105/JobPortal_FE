@@ -2,11 +2,11 @@ import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { RootState } from '../../store';
-import { getUserProfile, updateUserProfile, uploadAvatar, uploadCV } from '../../services/profileService';
+import { getUserProfile, updateUserProfile, uploadAvatar, uploadCV, deleteCV } from '../../services/profileService';
 import { getCurrentUser } from '../../services/authService';
 import { updateUserAvatar } from '../../store/slices/authSlice';
-import { JobseekerProfile } from '../../types/user';
-import { FiUpload, FiSave, FiPlus } from 'react-icons/fi';
+import { JobseekerProfile, Education, Experience } from '../../types/user';
+import { FiUpload, FiSave, FiPlus, FiTrash } from 'react-icons/fi';
 import EducationForm from '../../components/profile/EducationForm';
 import ExperienceForm from '../../components/profile/ExperienceForm';
 import EducationCard from '../../components/profile/EducationCard';
@@ -18,6 +18,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deletingCV, setDeletingCV] = useState(false);
   const [profile, setProfile] = useState<JobseekerProfile | null>(null);
   const [formData, setFormData] = useState({
     title: '',
@@ -34,6 +35,8 @@ const Profile = () => {
   // Modal states
   const [showEducationForm, setShowEducationForm] = useState(false);
   const [showExperienceForm, setShowExperienceForm] = useState(false);
+  const [currentEducation, setCurrentEducation] = useState<Education | null>(null);
+  const [currentExperience, setCurrentExperience] = useState<Experience | null>(null);
   
   // Fetch profile data
   useEffect(() => {
@@ -105,7 +108,6 @@ const Profile = () => {
   };
   
   // Handle avatar upload
-
   const handleAvatarUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -120,41 +122,17 @@ const Profile = () => {
       const formData = new FormData();
       formData.append('avatar', file);
       
-      // Upload avatar và log kết quả để debug
       const result = await uploadAvatar(formData);
-      console.log('Avatar upload result:', result);
-      
-      // Tạo avatarUrl nếu API không trả về
-      const avatarUrl = result.avatarUrl || `/uploads/avatars/${result.avatar}`;
       
       // Cập nhật state trong Redux
       dispatch(updateUserAvatar({
         avatar: result.avatar,
-        avatarUrl
+        avatarUrl: result.avatarUrl
       }));
-      
-      // Cập nhật state local nếu profile tồn tại
-      if (profile) {
-        // Định nghĩa interface tạm thời để mở rộng user
-        type ExtendedUser = typeof profile.user & { avatarUrl: string };
-        
-        // Tạo đối tượng user đã cập nhật
-        const updatedUser: ExtendedUser = {
-          ...profile.user,
-          avatar: result.avatar,
-          avatarUrl
-        };
-        
-        setProfile({
-          ...profile,
-          user: updatedUser
-        });
-      }
       
       // Refresh thông tin người dùng
       try {
-        const userData = await getCurrentUser();
-        console.log('Refreshed user data:', userData);
+        await getCurrentUser();
       } catch (refreshError) {
         console.error('Error refreshing user data:', refreshError);
       }
@@ -200,6 +178,79 @@ const Profile = () => {
     } finally {
       setUploading(false);
     }
+  };
+  
+  // Handle CV delete
+  const handleDeleteCV = async () => {
+    if (!profile?.cvFile) return;
+    
+    if (window.confirm('Bạn có chắc chắn muốn xóa CV này?')) {
+      try {
+        setDeletingCV(true);
+        await deleteCV();
+        
+        // Update profile state
+        if (profile) {
+          setProfile({
+            ...profile,
+            cvFile: ''
+          });
+        }
+        
+        toast.success('Đã xóa CV');
+      } catch (error) {
+        console.error('Failed to delete CV:', error);
+        toast.error('Không thể xóa CV');
+      } finally {
+        setDeletingCV(false);
+      }
+    }
+  };
+  
+  // Handle education delete
+  const handleEducationDelete = (educationId: string) => {
+    if (profile) {
+      setProfile({
+        ...profile,
+        education: profile.education.filter(edu => edu.id !== educationId)
+      });
+    }
+  };
+  
+  // Handle experience delete
+  const handleExperienceDelete = (experienceId: string) => {
+    if (profile) {
+      setProfile({
+        ...profile,
+        experience: profile.experience.filter(exp => exp.id !== experienceId)
+      });
+    }
+  };
+  
+  // Handle add/edit education submit
+  const handleEducationSubmit = (updatedProfile: JobseekerProfile) => {
+    setProfile(updatedProfile);
+    setShowEducationForm(false);
+    setCurrentEducation(null);
+  };
+  
+  // Handle add/edit experience submit
+  const handleExperienceSubmit = (updatedProfile: JobseekerProfile) => {
+    setProfile(updatedProfile);
+    setShowExperienceForm(false);
+    setCurrentExperience(null);
+  };
+  
+  // Open education form for editing
+  const handleEditEducation = (education: Education) => {
+    setCurrentEducation(education);
+    setShowEducationForm(true);
+  };
+  
+  // Open experience form for editing
+  const handleEditExperience = (experience: Experience) => {
+    setCurrentExperience(experience);
+    setShowExperienceForm(true);
   };
   
   if (loading) {
@@ -252,9 +303,24 @@ const Profile = () => {
                 {profile?.cvFile ? (
                   <div className="p-3 border rounded mb-3 flex justify-between items-center">
                     <span className="truncate">{profile.cvFile}</span>
-                    <a href={`/cv/${profile.cvFile}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline ml-2">
-                      Tải xuống
-                    </a>
+                    <div className="flex space-x-2">
+                      <a 
+                        href={`/api/cv/${profile.cvFile}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-blue-500 hover:underline"
+                      >
+                        Tải xuống
+                      </a>
+                      <button
+                        onClick={handleDeleteCV}
+                        disabled={deletingCV}
+                        className="text-red-500 hover:text-red-700"
+                        aria-label="Delete CV"
+                      >
+                        <FiTrash />
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <p className="text-gray-500 mb-3">Bạn chưa tải lên CV nào</p>
@@ -440,7 +506,10 @@ const Profile = () => {
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-xl font-semibold">Học vấn</h2>
           <button 
-            onClick={() => setShowEducationForm(true)}
+            onClick={() => {
+              setCurrentEducation(null); 
+              setShowEducationForm(true);
+            }}
             className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded flex items-center text-sm"
           >
             <FiPlus className="mr-1" /> Thêm
@@ -450,7 +519,12 @@ const Profile = () => {
           {profile?.education && profile.education.length > 0 ? (
             <div className="space-y-4">
               {profile.education.map((edu) => (
-                <EducationCard key={edu.id} education={edu} onDelete={() => {}} />
+                <EducationCard 
+                  key={edu.id} 
+                  education={edu} 
+                  onDelete={handleEducationDelete}
+                  onEdit={handleEditEducation}
+                />
               ))}
             </div>
           ) : (
@@ -464,7 +538,10 @@ const Profile = () => {
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-xl font-semibold">Kinh nghiệm làm việc</h2>
           <button 
-            onClick={() => setShowExperienceForm(true)}
+            onClick={() => {
+              setCurrentExperience(null);
+              setShowExperienceForm(true);
+            }}
             className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded flex items-center text-sm"
           >
             <FiPlus className="mr-1" /> Thêm
@@ -474,7 +551,12 @@ const Profile = () => {
           {profile?.experience && profile.experience.length > 0 ? (
             <div className="space-y-4">
               {profile.experience.map((exp) => (
-                <ExperienceCard key={exp.id} experience={exp} onDelete={() => {}} />
+                <ExperienceCard 
+                  key={exp.id} 
+                  experience={exp} 
+                  onDelete={handleExperienceDelete}
+                  onEdit={handleEditExperience}
+                />
               ))}
             </div>
           ) : (
@@ -485,11 +567,25 @@ const Profile = () => {
       
       {/* Các modal form */}
       {showEducationForm && (
-        <EducationForm onClose={() => setShowEducationForm(false)} onSubmit={() => {}} />
+        <EducationForm 
+          onClose={() => {
+            setShowEducationForm(false);
+            setCurrentEducation(null);
+          }} 
+          onSubmit={handleEducationSubmit}
+          initialData={currentEducation || undefined}
+        />
       )}
       
       {showExperienceForm && (
-        <ExperienceForm onClose={() => setShowExperienceForm(false)} onSubmit={() => {}} />
+        <ExperienceForm 
+          onClose={() => {
+            setShowExperienceForm(false);
+            setCurrentExperience(null);
+          }} 
+          onSubmit={handleExperienceSubmit}
+          initialData={currentExperience || undefined}
+        />
       )}
     </div>
   );

@@ -18,7 +18,7 @@ function App() {
         if (token) {
           const response = await getCurrentUser();
           dispatch(loginSuccess({ 
-            user: response.user, 
+            user: response, 
             token 
           }));
         }

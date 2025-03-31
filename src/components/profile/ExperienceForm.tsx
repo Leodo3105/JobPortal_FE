@@ -1,21 +1,24 @@
 import { useState, FormEvent } from 'react';
 import { FiX } from 'react-icons/fi';
-import { addExperience } from '../../services/profileService';
 import { toast } from 'react-toastify';
+import { addExperience } from '../../services/profileService';
+import { JobseekerProfile } from '../../types/user';
+
+interface Experience {
+  id?: string;
+  company: string;
+  position: string;
+  location?: string;
+  from: string;
+  to?: string;
+  current: boolean;
+  description?: string;
+}
 
 interface ExperienceFormProps {
   onClose: () => void;
-  onSubmit: () => void;
-  initialData?: {
-    id?: string;
-    company: string;
-    position: string;
-    location?: string;
-    from: string;
-    to?: string;
-    current: boolean;
-    description?: string;
-  };
+  onSubmit: (updatedProfile: JobseekerProfile) => void;
+  initialData?: Experience;
 }
 
 const ExperienceForm = ({ onClose, onSubmit, initialData }: ExperienceFormProps) => {
@@ -45,7 +48,7 @@ const ExperienceForm = ({ onClose, onSubmit, initialData }: ExperienceFormProps)
     try {
       setLoading(true);
       
-      await addExperience({
+      const response = await addExperience({
         company: formData.company,
         position: formData.position,
         location: formData.location,
@@ -55,12 +58,11 @@ const ExperienceForm = ({ onClose, onSubmit, initialData }: ExperienceFormProps)
         description: formData.description
       });
       
-      toast.success('Đã thêm kinh nghiệm làm việc');
-      onSubmit();
-      onClose();
+      toast.success(initialData ? 'Đã cập nhật kinh nghiệm làm việc' : 'Đã thêm kinh nghiệm làm việc');
+      onSubmit(response);
     } catch (error) {
-      console.error('Failed to add experience:', error);
-      toast.error('Không thể thêm kinh nghiệm làm việc');
+      console.error('Failed to add/update experience:', error);
+      toast.error(initialData ? 'Không thể cập nhật kinh nghiệm làm việc' : 'Không thể thêm kinh nghiệm làm việc');
     } finally {
       setLoading(false);
     }

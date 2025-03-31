@@ -6,10 +6,14 @@ import PrivateRoute from '../components/auth/PrivateRoute';
 // Lazy load components
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const JobseekerDashboard = lazy(() => import('../pages/Jobseeker/Dashboard'));
+const MyApplications = lazy(() => import('../pages/Jobseeker/MyApplications')); 
+const ApplicationDetail = lazy(() => import('../pages/Jobseeker/ApplicationDetail'));
+const SavedJobs = lazy(() => import('../pages/Jobseeker/SavedJobs'));
 const EmployerDashboard = lazy(() => import('../pages/Employer/Dashboard'));
 const AdminDashboard = lazy(() => import('../pages/Admin/Dashboard'));
 const JobseekerProfile = lazy(() => import('../pages/Jobseeker/Profile'));
 const CompanyProfile = lazy(() => import('../pages/Employer/CompanyProfile'));
+const CompanyPreview = lazy(() => import('../pages/Employer/CompanyPreview'));
 const Unauthorized = lazy(() => import('../pages/Unauthorized'));
 const RoleBasedProfileRedirect = lazy(() => import('../components/auth/RoleBasedProfileRedirect'));
 
@@ -44,8 +48,19 @@ const privateRoutes: RouteObject[] = [
               {
                 path: '/jobseeker/dashboard',
                 element: React.createElement(JobseekerDashboard, null)
+              },
+              {
+                path: '/jobseeker/applications',
+                element: React.createElement(MyApplications, null)
+              },
+              {
+                path: '/jobseeker/applications/:id',
+                element: React.createElement(ApplicationDetail, null)
+              },
+              {
+                path: '/jobseeker/saved-jobs',
+                element: React.createElement(SavedJobs, null)
               }
-              // Thêm các route khác cho jobseeker
             ]
           }
         ]
@@ -57,6 +72,10 @@ const privateRoutes: RouteObject[] = [
           {
             path: '/employer/company-profile',
             element: React.createElement(CompanyProfile, null)
+          },
+          {
+            path: '/employer/company-preview',
+            element: React.createElement(CompanyPreview, null)
           },
           {
             element: React.createElement(DashboardLayout, null),

@@ -46,3 +46,22 @@ export interface Job {
     showSalary?: boolean;
     applicationDeadline: string;
   }
+
+  export interface SavedJob {
+    id: string;
+    job: {
+      id: string;
+      title: string;
+      company: {
+        id: string;
+        name: string;
+        logo?: string;
+      };
+      location: string;
+      jobType: string;
+      status: string;
+      applicationDeadline: string;
+      createdAt: string;
+    };
+    createdAt: string;
+  }

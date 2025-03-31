@@ -1,17 +1,39 @@
+import { useState } from 'react';
 import { FiEdit2, FiTrash2, FiCalendar, FiMapPin } from 'react-icons/fi';
+import { toast } from 'react-toastify';
 import { Experience } from '../../types/user';
+import { deleteExperience } from '../../services/profileService';
 
 interface ExperienceCardProps {
   experience: Experience;
-  onDelete: () => void;
-  onEdit?: () => void;
+  onDelete: (id: string) => void;
+  onEdit?: (experience: Experience) => void;
 }
 
 const ExperienceCard = ({ experience, onDelete, onEdit }: ExperienceCardProps) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+  
   // Format date function
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('vi-VN', { year: 'numeric', month: 'long' });
+  };
+  
+  // Handle delete experience
+  const handleDelete = async () => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa kinh nghiệm làm việc này?')) {
+      try {
+        setIsDeleting(true);
+        await deleteExperience(experience.id);
+        toast.success('Đã xóa kinh nghiệm làm việc');
+        onDelete(experience.id);
+      } catch (error) {
+        console.error('Failed to delete experience:', error);
+        toast.error('Không thể xóa kinh nghiệm làm việc');
+      } finally {
+        setIsDeleting(false);
+      }
+    }
   };
   
   return (
@@ -21,7 +43,7 @@ const ExperienceCard = ({ experience, onDelete, onEdit }: ExperienceCardProps) =
         <div className="flex space-x-2">
           {onEdit && (
             <button 
-              onClick={onEdit} 
+              onClick={() => onEdit(experience)} 
               className="text-blue-500 hover:text-blue-700"
               aria-label="Edit"
             >
@@ -29,9 +51,10 @@ const ExperienceCard = ({ experience, onDelete, onEdit }: ExperienceCardProps) =
             </button>
           )}
           <button 
-            onClick={onDelete} 
+            onClick={handleDelete} 
             className="text-red-500 hover:text-red-700"
             aria-label="Delete"
+            disabled={isDeleting}
           >
             <FiTrash2 />
           </button>

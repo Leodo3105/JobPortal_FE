@@ -1,21 +1,24 @@
 import { useState, FormEvent } from 'react';
 import { FiX } from 'react-icons/fi';
-import { addEducation } from '../../services/profileService';
 import { toast } from 'react-toastify';
+import { addEducation } from '../../services/profileService';
+import { JobseekerProfile } from '../../types/user';
+
+interface Education {
+  id?: string;
+  school: string;
+  degree: string;
+  fieldOfStudy: string;
+  from: string;
+  to?: string;
+  current: boolean;
+  description?: string;
+}
 
 interface EducationFormProps {
   onClose: () => void;
-  onSubmit: () => void;
-  initialData?: {
-    id?: string;
-    school: string;
-    degree: string;
-    fieldOfStudy: string;
-    from: string;
-    to?: string;
-    current: boolean;
-    description?: string;
-  };
+  onSubmit: (updatedProfile: JobseekerProfile) => void;
+  initialData?: Education;
 }
 
 const EducationForm = ({ onClose, onSubmit, initialData }: EducationFormProps) => {
@@ -45,7 +48,7 @@ const EducationForm = ({ onClose, onSubmit, initialData }: EducationFormProps) =
     try {
       setLoading(true);
       
-      await addEducation({
+      const response = await addEducation({
         school: formData.school,
         degree: formData.degree,
         fieldOfStudy: formData.fieldOfStudy,
@@ -55,12 +58,11 @@ const EducationForm = ({ onClose, onSubmit, initialData }: EducationFormProps) =
         description: formData.description
       });
       
-      toast.success('Đã thêm thông tin học vấn');
-      onSubmit();
-      onClose();
+      toast.success(initialData ? 'Đã cập nhật thông tin học vấn' : 'Đã thêm thông tin học vấn');
+      onSubmit(response);
     } catch (error) {
-      console.error('Failed to add education:', error);
-      toast.error('Không thể thêm thông tin học vấn');
+      console.error('Failed to add/update education:', error);
+      toast.error(initialData ? 'Không thể cập nhật thông tin học vấn' : 'Không thể thêm thông tin học vấn');
     } finally {
       setLoading(false);
     }
@@ -76,7 +78,7 @@ const EducationForm = ({ onClose, onSubmit, initialData }: EducationFormProps) =
           <button 
             onClick={onClose} 
             className="text-gray-500 hover:text-gray-700"
-            aria-label="Close education form"
+            aria-label="Đóng"
           >
             <FiX size={20} />
           </button>

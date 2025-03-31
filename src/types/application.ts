@@ -3,6 +3,7 @@ export interface Application {
     job: {
       id: string;
       title: string;
+      location: string;
       company: {
         id: string;
         name: string;
