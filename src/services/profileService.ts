@@ -16,9 +16,9 @@ export const updateUserProfile = async (profileData: Partial<JobseekerProfile>):
 
 // Thêm thông tin học vấn
 export const addEducation = async (educationData: EducationInput): Promise<JobseekerProfile> => {
-    const response = await api.put<{ success: boolean; data: JobseekerProfile }>('/profiles/education', educationData);
-    return response.data.data;
-  };
+  const response = await api.put<{ success: boolean; data: JobseekerProfile }>('/profiles/education', educationData);
+  return response.data.data;
+};
 
 // Xóa thông tin học vấn
 export const deleteEducation = async (educationId: string): Promise<JobseekerProfile> => {
@@ -28,9 +28,9 @@ export const deleteEducation = async (educationId: string): Promise<JobseekerPro
 
 // Thêm kinh nghiệm làm việc
 export const addExperience = async (experienceData: ExperienceInput): Promise<JobseekerProfile> => {
-    const response = await api.put<{ success: boolean; data: JobseekerProfile }>('/profiles/experience', experienceData);
-    return response.data.data;
-  };
+  const response = await api.put<{ success: boolean; data: JobseekerProfile }>('/profiles/experience', experienceData);
+  return response.data.data;
+};
 
 // Xóa kinh nghiệm làm việc
 export const deleteExperience = async (experienceId: string): Promise<JobseekerProfile> => {
@@ -48,12 +48,13 @@ export const uploadCV = async (formData: FormData): Promise<{ fileName: string; 
   return response.data.data;
 };
 
-// Upload ảnh đại diện
+// Upload ảnh đại diện - KIỂM TRA KỸ PHẦN NÀY
 export const uploadAvatar = async (formData: FormData): Promise<{ avatar: string; avatarUrl: string }> => {
   const response = await api.put<{ success: boolean; data: { avatar: string; avatarUrl: string } }>('/profiles/avatar', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   });
+  console.log('API response:', response.data); // Log để debug
   return response.data.data;
 };

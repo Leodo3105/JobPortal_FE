@@ -42,8 +42,15 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       localStorage.removeItem('token');
     },
+    // Thêm reducer mới để cập nhật avatar
+    updateUserAvatar: (state, action: PayloadAction<{ avatar: string; avatarUrl: string }>) => {
+      if (state.user) {
+        state.user.avatar = action.payload.avatar;
+        state.user.avatarUrl = action.payload.avatarUrl;
+      }
+    },
   },
 });
 
-export const { loginStart, loginSuccess, loginFailure, logout } = authSlice.actions;
+export const { loginStart, loginSuccess, loginFailure, logout, updateUserAvatar } = authSlice.actions;
 export default authSlice.reducer;

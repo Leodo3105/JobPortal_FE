@@ -1,8 +1,10 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { RootState } from '../../store';
 import { getUserProfile, updateUserProfile, uploadAvatar, uploadCV } from '../../services/profileService';
+import { getCurrentUser } from '../../services/authService';
+import { updateUserAvatar } from '../../store/slices/authSlice';
 import { JobseekerProfile } from '../../types/user';
 import { FiUpload, FiSave, FiPlus } from 'react-icons/fi';
 import EducationForm from '../../components/profile/EducationForm';
@@ -11,6 +13,7 @@ import EducationCard from '../../components/profile/EducationCard';
 import ExperienceCard from '../../components/profile/ExperienceCard';
 
 const Profile = () => {
+  const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -102,6 +105,7 @@ const Profile = () => {
   };
   
   // Handle avatar upload
+
   const handleAvatarUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -116,19 +120,46 @@ const Profile = () => {
       const formData = new FormData();
       formData.append('avatar', file);
       
+      // Upload avatar và log kết quả để debug
       const result = await uploadAvatar(formData);
-      toast.success('Ảnh đại diện đã được cập nhật');
+      console.log('Avatar upload result:', result);
       
-      // Update user avatar in profile
+      // Tạo avatarUrl nếu API không trả về
+      const avatarUrl = result.avatarUrl || `/uploads/avatars/${result.avatar}`;
+      
+      // Cập nhật state trong Redux
+      dispatch(updateUserAvatar({
+        avatar: result.avatar,
+        avatarUrl
+      }));
+      
+      // Cập nhật state local nếu profile tồn tại
       if (profile) {
+        // Định nghĩa interface tạm thời để mở rộng user
+        type ExtendedUser = typeof profile.user & { avatarUrl: string };
+        
+        // Tạo đối tượng user đã cập nhật
+        const updatedUser: ExtendedUser = {
+          ...profile.user,
+          avatar: result.avatar,
+          avatarUrl
+        };
+        
         setProfile({
           ...profile,
-          user: {
-            ...profile.user,
-            avatar: result.avatar
-          }
+          user: updatedUser
         });
       }
+      
+      // Refresh thông tin người dùng
+      try {
+        const userData = await getCurrentUser();
+        console.log('Refreshed user data:', userData);
+      } catch (refreshError) {
+        console.error('Error refreshing user data:', refreshError);
+      }
+      
+      toast.success('Ảnh đại diện đã được cập nhật');
     } catch (error) {
       console.error('Failed to upload avatar:', error);
       toast.error('Không thể cập nhật ảnh đại diện');
@@ -191,7 +222,7 @@ const Profile = () => {
               <div className="relative mb-4">
                 {user?.avatar ? (
                   <img 
-                    src={`/uploads/avatars/${user.avatar}`} 
+                    src={`${user.avatarUrl || `/uploads/avatars/${user.avatar}`}?t=${Date.now()}`}
                     alt={user?.name} 
                     className="w-40 h-40 rounded-full object-cover border-4 border-gray-200"
                   />
@@ -452,7 +483,7 @@ const Profile = () => {
         </div>
       </div>
       
-      {/* Các modal form sẽ được triển khai sau */}
+      {/* Các modal form */}
       {showEducationForm && (
         <EducationForm onClose={() => setShowEducationForm(false)} onSubmit={() => {}} />
       )}

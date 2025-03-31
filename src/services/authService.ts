@@ -1,5 +1,6 @@
 import api from '../config/axios';
 import { LoginCredentials, RegisterData, AuthResponse } from '../types/auth';
+import { User } from '../types/user';
 
 export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
   const response = await api.post<AuthResponse>('/auth/login', credentials);
@@ -15,9 +16,10 @@ export const logout = async (): Promise<void> => {
   await api.get('/auth/logout');
 };
 
-export const getCurrentUser = async (): Promise<AuthResponse> => {
-  const response = await api.get<AuthResponse>('/auth/me');
-  return response.data;
+// Đây là phương thức để refresh thông tin người dùng hiện tại
+export const getCurrentUser = async (): Promise<User> => {
+  const response = await api.get<{ success: boolean; data: User }>('/auth/me');
+  return response.data.data;
 };
 
 export const forgotPassword = async (email: string): Promise<{ success: boolean; message: string }> => {
@@ -29,4 +31,3 @@ export const resetPassword = async (token: string, password: string): Promise<{ 
   const response = await api.post<{ success: boolean; message: string }>('/auth/reset-password', { token, password });
   return response.data;
 };
-

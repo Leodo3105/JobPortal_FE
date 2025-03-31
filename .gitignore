@@ -31,5 +31,6 @@ dist-ssr
 
 # Optional: package lock files (tùy thuộc vào quyết định của team)
 package-lock.json
+
 # yarn.lock
 # pnpm-lock.yaml

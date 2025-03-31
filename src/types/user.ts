@@ -4,6 +4,7 @@ export interface User {
   email: string;
   role: 'jobseeker' | 'employer' | 'admin';
   avatar?: string;
+  avatarUrl?: string; 
   phone?: string;
   emailVerified: boolean;
   createdAt: string;
