@@ -36,14 +36,35 @@ const initialState: ProfileState = {
   successMessage: null
 };
 
+type ApiError = {
+  response?: {
+    data?: {
+      error?: string;
+    };
+  };
+};
+
 // Async thunks
 export const fetchProfile = createAsyncThunk(
   'profile/fetchProfile',
   async (_, { rejectWithValue }) => {
     try {
       return await getUserProfile();
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể tải thông tin hồ sơ');
+    } catch (error: unknown) {
+      // Type guard to check if error is an ApiError
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể tải thông tin hồ sơ';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -53,8 +74,20 @@ export const updateProfile = createAsyncThunk(
   async (profileData: Partial<JobseekerProfile>, { rejectWithValue }) => {
     try {
       return await updateUserProfile(profileData);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể cập nhật hồ sơ');
+    } catch (error: unknown) {
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể cập nhật hồ sơ';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -64,19 +97,43 @@ export const addProfileEducation = createAsyncThunk(
   async (educationData: EducationInput, { rejectWithValue }) => {
     try {
       return await addEducation(educationData);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể thêm thông tin học vấn');
+    } catch (error: unknown) {
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể thêm thông tin giáo dục';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
-
 export const removeEducation = createAsyncThunk(
   'profile/removeEducation',
   async (educationId: string, { rejectWithValue }) => {
     try {
       return await deleteEducation(educationId);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể xóa thông tin học vấn');
+    } catch (error: unknown) {
+      // Type guard to check if error is an ApiError
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể xóa thông tin học vấn';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -86,8 +143,20 @@ export const addProfileExperience = createAsyncThunk(
   async (experienceData: ExperienceInput, { rejectWithValue }) => {
     try {
       return await addExperience(experienceData);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể thêm kinh nghiệm làm việc');
+    } catch (error: unknown) {
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể thêm kinh nghiệm làm việc';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -97,8 +166,20 @@ export const removeExperience = createAsyncThunk(
   async (experienceId: string, { rejectWithValue }) => {
     try {
       return await deleteExperience(experienceId);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể xóa kinh nghiệm làm việc');
+    } catch (error: unknown) {
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể xóa kinh nghiệm làm việc';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -108,8 +189,21 @@ export const uploadProfileCV = createAsyncThunk(
   async (formData: FormData, { rejectWithValue }) => {
     try {
       return await uploadCV(formData);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể tải CV lên');
+    } catch (error: unknown) {
+      // Type guard to check if error is an ApiError
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể tải CV lên';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -119,8 +213,21 @@ export const deleteProfileCV = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       return await deleteCV();
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể xóa CV');
+    } catch (error: unknown) {
+      // Type guard to check if error is an ApiError
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể xóa CV';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -130,11 +237,24 @@ export const uploadProfileAvatar = createAsyncThunk(
   async (formData: FormData, { dispatch, rejectWithValue }) => {
     try {
       const result = await uploadAvatar(formData);
-      // Cập nhật avatar trong user state
+      // Update avatar in user state
       dispatch(updateUserAvatar(result));
       return result;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể tải ảnh đại diện lên');
+    } catch (error: unknown) {
+      // Type guard to check if error is an ApiError
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể tải ảnh đại diện lên';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -144,11 +264,29 @@ export const resetProfileAvatar = createAsyncThunk(
   async (_, { dispatch, rejectWithValue }) => {
     try {
       const result = await resetAvatar();
-      // Cập nhật avatar trong user state về mặc định
-      dispatch(updateUserAvatar({ avatar: 'default-avatar.jpg', avatarUrl: '/uploads/avatars/default-avatar.jpg' }));
+      // Reset avatar in user state to default
+      dispatch(
+        updateUserAvatar({
+          avatar: 'default-avatar.jpg',
+          avatarUrl: '/uploads/avatars/default-avatar.jpg',
+        })
+      );
       return result;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể đặt lại ảnh đại diện');
+    } catch (error: unknown) {
+      // Type guard to check if error is an ApiError
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể đặt lại ảnh đại diện';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -158,8 +296,21 @@ export const fetchAllProfiles = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       return await getAllProfiles();
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể tải danh sách hồ sơ');
+    } catch (error: unknown) {
+      // Type guard to check if error is an ApiError
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể tải danh sách hồ sơ';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -169,8 +320,20 @@ export const fetchProfileById = createAsyncThunk(
   async (userId: string, { rejectWithValue }) => {
     try {
       return await getProfileById(userId);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể tải thông tin hồ sơ');
+    } catch (error: unknown) {
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể tải thông tin hồ sơ';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -180,8 +343,20 @@ export const deleteProfile = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       return await deleteProfileApi();
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể xóa hồ sơ');
+    } catch (error: unknown) {
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể xóa hồ sơ';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );

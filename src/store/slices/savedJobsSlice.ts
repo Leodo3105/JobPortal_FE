@@ -14,14 +14,35 @@ const initialState: SavedJobsState = {
   error: null
 };
 
+type ApiError = {
+  response?: {
+    data?: {
+      error?: string;
+    };
+  };
+};
+
 // Thunks
 export const fetchSavedJobs = createAsyncThunk(
   'savedJobs/fetchSavedJobs',
   async (_, { rejectWithValue }) => {
     try {
       return await getSavedJobs();
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể tải danh sách việc làm đã lưu');
+    } catch (error: unknown) {
+      // Type guard to check if error is an ApiError
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể tải danh sách việc làm đã lưu';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -32,20 +53,49 @@ export const addSavedJob = createAsyncThunk(
     try {
       await saveJob(jobId);
       return jobId;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể lưu việc làm');
+    } catch (error: unknown) {
+      // Type guard to check if error is an ApiError
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể lưu việc làm';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );
 
 export const removeSavedJob = createAsyncThunk(
   'savedJobs/removeSavedJob',
-  async ({ jobId, savedJobId }: { jobId: string, savedJobId: string }, { rejectWithValue }) => {
+  async (
+    { jobId, savedJobId }: { jobId: string; savedJobId: string },
+    { rejectWithValue }
+  ) => {
     try {
       await unsaveJob(jobId);
       return savedJobId;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể xóa việc làm đã lưu');
+    } catch (error: unknown) {
+      // Type guard to check if error is an ApiError
+      const isApiError = (err: unknown): err is ApiError =>
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as ApiError).response?.data?.error === 'string';
+
+      const errorMessage = isApiError(error)
+        ? error.response?.data?.error
+        : error instanceof Error
+        ? error.message
+        : 'Không thể xóa việc làm đã lưu';
+
+      return rejectWithValue(errorMessage);
     }
   }
 );

@@ -63,3 +63,27 @@ export const uploadAvatar = async (formData: FormData): Promise<{ avatar: string
   });
   return response.data.data;
 };
+
+// Reset avatar về mặc định
+export const resetAvatar = async (): Promise<{ avatar: string; avatarUrl: string }> => {
+  const response = await api.delete<{ success: boolean; data: { avatar: string; avatarUrl: string } }>('/profiles/avatar');
+  return response.data.data;
+};
+
+// Lấy tất cả profile (dành cho admin)
+export const getAllProfiles = async (): Promise<JobseekerProfile[]> => {
+  const response = await api.get<{ success: boolean; data: JobseekerProfile[] }>('/profiles/all');
+  return response.data.data;
+};
+
+// Lấy profile theo ID
+export const getProfileById = async (userId: string): Promise<JobseekerProfile> => {
+  const response = await api.get<{ success: boolean; data: JobseekerProfile }>(`/profiles/${userId}`);
+  return response.data.data;
+};
+
+// Xóa profile
+export const deleteProfile = async (): Promise<{ success: boolean; message: string }> => {
+  const response = await api.delete<{ success: boolean; message: string }>('/profiles');
+  return response.data;
+};

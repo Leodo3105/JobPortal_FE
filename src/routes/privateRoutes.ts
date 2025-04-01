@@ -14,6 +14,7 @@ const AdminDashboard = lazy(() => import('../pages/Admin/Dashboard'));
 const JobseekerProfile = lazy(() => import('../pages/Jobseeker/Profile'));
 const CompanyProfile = lazy(() => import('../pages/Employer/CompanyProfile'));
 const CompanyPreview = lazy(() => import('../pages/Employer/CompanyPreview'));
+const Categories = lazy(() => import('../pages/Admin/Categories'));
 const Unauthorized = lazy(() => import('../pages/Unauthorized'));
 const RoleBasedProfileRedirect = lazy(() => import('../components/auth/RoleBasedProfileRedirect'));
 
@@ -83,6 +84,14 @@ const privateRoutes: RouteObject[] = [
               {
                 path: '/employer/dashboard',
                 element: React.createElement(EmployerDashboard, null)
+              },
+              {
+                path: '/employer/applications',
+                element: React.createElement(lazy(() => import('../pages/Employer/Applications')), null)
+              },
+              {
+                path: '/employer/applications/:id',
+                element: React.createElement(lazy(() => import('../pages/Employer/ApplicationDetail')), null)
               }
               // Thêm các route khác cho employer
             ]
@@ -99,6 +108,10 @@ const privateRoutes: RouteObject[] = [
               {
                 path: '/admin/dashboard',
                 element: React.createElement(AdminDashboard, null)
+              },
+              {
+                path: '/admin/categories',
+                element: React.createElement(Categories, null)
               }
               // Thêm các route khác cho admin
             ]

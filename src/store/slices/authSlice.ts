@@ -36,8 +36,9 @@ export const login = createAsyncThunk(
       const response = await loginApi(credentials);
       localStorage.setItem('token', response.token);
       return response;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Đăng nhập thất bại');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      return rejectWithValue(err.response?.data?.error || 'Đăng nhập thất bại');
     }
   }
 );
@@ -49,8 +50,9 @@ export const register = createAsyncThunk(
       const response = await registerApi(userData);
       localStorage.setItem('token', response.token);
       return response;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Đăng ký thất bại');
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      return rejectWithValue(err.response?.data?.error || 'Đăng ký thất bại');
     }
   }
 );
@@ -62,10 +64,11 @@ export const logoutUser = createAsyncThunk(
       await logoutApi();
       localStorage.removeItem('token');
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Ngay cả khi API thất bại, vẫn xóa token ở client
       localStorage.removeItem('token');
-      return rejectWithValue(error.response?.data?.error || 'Đăng xuất thất bại');
+      const err = error as { response?: { data?: { error?: string } } };
+      return rejectWithValue(err.response?.data?.error || 'Đăng xuất thất bại');
     }
   }
 );
@@ -75,8 +78,12 @@ export const getCurrentUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       return await getCurrentUserApi();
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Không thể lấy thông tin người dùng');
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const err = error as { response?: { data?: { error?: string } } };
+        return rejectWithValue(err.response?.data?.error || 'Không thể lấy thông tin người dùng');
+      }
+      return rejectWithValue('Không thể lấy thông tin người dùng');
     }
   }
 );
@@ -87,20 +94,31 @@ export const forgotPassword = createAsyncThunk(
     try {
       const response = await forgotPasswordApi(email);
       return response.message;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Yêu cầu đặt lại mật khẩu thất bại');
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const err = error as { response?: { data?: { error?: string } } };
+        return rejectWithValue(err.response?.data?.error || 'Yêu cầu đặt lại mật khẩu thất bại');
+      }
+      return rejectWithValue('Yêu cầu đặt lại mật khẩu thất bại');
     }
   }
 );
 
 export const resetPassword = createAsyncThunk(
   'auth/resetPassword',
-  async ({ token, password }: { token: string, password: string }, { rejectWithValue }) => {
+  async (
+    { token, password }: { token: string; password: string },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await resetPasswordApi(token, password);
       return response.message;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Đặt lại mật khẩu thất bại');
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const err = error as { response?: { data?: { error?: string } } };
+        return rejectWithValue(err.response?.data?.error || 'Đặt lại mật khẩu thất bại');
+      }
+      return rejectWithValue('Đặt lại mật khẩu thất bại');
     }
   }
 );
@@ -109,6 +127,29 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    loginStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    loginSuccess: (state, action: PayloadAction<{ user: User; token: string }>) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.error = null;
+    },
+    loginFailure: (state, action: PayloadAction<string>) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.error = action.payload;
+    },
+    logout: (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.user = null;
+      state.token = null;
+      localStorage.removeItem('token');
+    },
     clearErrors: (state) => {
       state.error = null;
     },
@@ -230,5 +271,14 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearErrors, clearMessages, updateUserAvatar } = authSlice.actions;
+export const { 
+  clearErrors, 
+  clearMessages, 
+  updateUserAvatar, 
+  loginStart, 
+  loginSuccess, 
+  loginFailure, 
+  logout 
+} = authSlice.actions;
+
 export default authSlice.reducer;
