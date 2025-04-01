@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from './useRedux';
-import { RootState } from '../../store';
+import { RootState } from '../store';
 import {
   fetchProfile,
   updateProfile,
@@ -17,9 +17,9 @@ import {
   deleteProfile,
   clearProfileErrors,
   clearProfileMessages
-} from '../../store/slices/profileSlice';
-import { JobseekerProfile } from '../../types/user';
-import { EducationInput, ExperienceInput } from '../../types/profile';
+} from '../store/slices/profileSlice';
+import { JobseekerProfile } from '../types/user';
+import { EducationInput, ExperienceInput } from '../types/profile';
 
 export const useProfile = () => {
   const dispatch = useAppDispatch();

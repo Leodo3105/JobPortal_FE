@@ -1,8 +1,8 @@
 import { useState, FormEvent } from 'react';
 import { FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { addExperience } from '../../services/profileService';
-import { JobseekerProfile } from '../../types/user';
+import { addExperience } from '../../../services/profileService';
+import { JobseekerProfile } from '../../../types/user';
 
 interface Experience {
   id?: string;

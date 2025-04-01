@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { FiEdit2, FiTrash2, FiCalendar } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { Education } from '../../types/user';
-import { deleteEducation } from '../../services/profileService';
+import { Education } from '../../../types/user';
+import { deleteEducation } from '../../../services/profileService';
 
 interface EducationCardProps {
   education: Education;

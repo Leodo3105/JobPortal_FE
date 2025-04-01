@@ -7,10 +7,10 @@ import { getCurrentUser } from '../../services/authService';
 import { updateUserAvatar } from '../../store/slices/authSlice';
 import { JobseekerProfile, Education, Experience } from '../../types/user';
 import { FiUpload, FiSave, FiPlus, FiTrash } from 'react-icons/fi';
-import EducationForm from '../../components/profile/EducationForm';
-import ExperienceForm from '../../components/profile/ExperienceForm';
-import EducationCard from '../../components/profile/EducationCard';
-import ExperienceCard from '../../components/profile/ExperienceCard';
+import EducationForm from '../../components/features/profile/EducationForm';
+import ExperienceForm from '../../components/features/profile/ExperienceForm';
+import EducationCard from '../../components/features/profile/EducationCard';
+import ExperienceCard from '../../components/features/profile/ExperienceCard';
 
 const Profile = () => {
   const dispatch = useDispatch();

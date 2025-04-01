@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from './useRedux';
-import { RootState } from '../../store';
+import { RootState } from '../store';
 import { 
   login, 
   register, 
@@ -10,9 +10,9 @@ import {
   resetPassword,
   clearErrors,
   clearMessages
-} from '../../store/slices/authSlice';
-import { LoginCredentials, RegisterData } from '../../types/auth';
-import { resetProfile } from '../../store/slices/profileSlice';
+} from '../store/slices/authSlice';
+import { LoginCredentials, RegisterData } from '../types/auth';
+import { resetProfile } from '../store/slices/profileSlice';
 
 export const useAuth = () => {
   const dispatch = useAppDispatch();

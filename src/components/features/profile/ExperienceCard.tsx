@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { FiEdit2, FiTrash2, FiCalendar, FiMapPin } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { Experience } from '../../types/user';
-import { deleteExperience } from '../../services/profileService';
+import { Experience } from '../../../types/user';
+import { deleteExperience } from '../../../services/profileService';
 
 interface ExperienceCardProps {
   experience: Experience;

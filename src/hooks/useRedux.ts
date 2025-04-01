@@ -1,6 +1,6 @@
 
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
-import type { RootState, AppDispatch } from '../../store';
+import type { RootState, AppDispatch } from '../store';
 
 // Sử dụng trong toàn bộ ứng dụng thay thế cho useDispatch và useSelector thông thường
 export const useAppDispatch = () => useDispatch<AppDispatch>();

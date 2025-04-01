@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FiBookmark, FiClock, FiMapPin, FiBriefcase, FiTrash2 } from 'react-icons/fi';
-import { useAppDispatch, useAppSelector } from '../../components/hooks/useRedux';
+import { useAppDispatch, useAppSelector } from '../../hooks/useRedux';
 import { fetchSavedJobs, removeSavedJob } from '../../store/slices/savedJobsSlice';
 
 const SavedJobs = () => {
